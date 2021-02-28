@@ -3,13 +3,9 @@
 #include <iostream>
 #include <list>
 
-
 using namespace std;
 
 class view;
-
-//extern int view::col;
-//extern int view::row;
 
 struct Coord
 {
@@ -38,7 +34,6 @@ class Model
 public:
 	Model(view* myview);
 	list<Rabbit> get_rabbits();
-//	void paint(const Rabbit& r);
 private:
 	view* myview;
 	list<Rabbit> rabbits; 

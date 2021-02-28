@@ -7,7 +7,7 @@ Model::Model(view* thisview)
 	int row = myview->get_row();
 	int x = rand() % (col - 2) + 1;
 	int y = rand() % (row - 2) + 1;
-	rabbits.push_back(Rabbit(x, y));
+	rabbits.push_back(Rabbit(10, 20));
 }
 
 list<Rabbit> Model::get_rabbits()
