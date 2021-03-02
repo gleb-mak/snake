@@ -1,11 +1,12 @@
 #pragma once
 
+#include <ctime>
 #include <iostream>
 #include <list>
 
 using namespace std;
 
-class view;
+class View;
 
 struct Coord
 {
@@ -22,20 +23,30 @@ private:
 	Coord c;
 };
 
+enum Direction {LEFT, RIGHT, UP, DOWN};
+
 class Snake
 {
+public:
+	Snake();
+	Snake(Coord begin, int len);
+	list<Coord> get_body() const;
+	Coord get_head() const;
+	Direction get_direct() const;
 private:
 	list<Coord> body;
-	enum direction {left, right, up, down};
+	Coord head;
+	Direction direct;
 };
 
 class Model
 {
 public:
-	Model(view* myview);
+	Model(View* myview);
 	list<Rabbit> get_rabbits();
+	Snake get_snake();
 private:
-	view* myview;
+	View* view;
 	list<Rabbit> rabbits; 
 	Snake snake;
 };

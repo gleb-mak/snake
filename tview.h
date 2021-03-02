@@ -1,18 +1,26 @@
 #pragma once
 
-#include <functional>
 #include <string>
+#include <cstdio>
+#include <functional>
+#include <signal.h>
+#include <iostream>
+#include <stdio.h>
+#include <unistd.h>
+#include <stddef.h>
+#include <sys/ioctl.h>
 #include "view.h"
 
 using namespace std;
 
-class tview : public view
+class Tview : public View
 {
 public:
-	tview();
-	virtual void show();
-	virtual void paint(const Rabbit& r);
-	virtual void paint(const Snake& s);
+	Tview();
+	void show();
+	void paint(const Rabbit& rabbit);
+	void paint(const list<Rabbit>& rabbits);
+	void paint(const Snake& snake);
 	int get_row();
 	int get_col();
 
@@ -23,7 +31,7 @@ private:
 	static function<void(void)> onwinch;
 	static void winch(int n);
 	void draw_set_winsize();
-	void draw_set_color(char color);
+	void draw_set_color(string color);
 	void draw_default_color();
 	void draw_string(int x, int y, string str);
 	void draw_v_line(int x, int y, int len);

@@ -1,30 +1,19 @@
-#include <functional>
-#include <signal.h>
-#include <iostream>
-#include <stdio.h>
-#include <unistd.h>
-#include <stddef.h>
-#include <sys/ioctl.h>
 #include "tview.h"
-#include <cstdio>
 
 #define ESC "\033"
 
 using namespace std;
 
-function<void(void)> tview::onwinch;
+function<void(void)> Tview::onwinch;
 
-tview::tview()
+Tview::Tview()
 {
 	draw_set_winsize();
-	onwinch = bind(&tview::show, this);
-	struct sigaction act;
-	act.sa_handler = &tview::winch;
-	act.sa_flags = SA_RESTART;
-	sigaction(SIGWINCH, &act, 0);
+	onwinch = bind(&Tview::show, this);
+	signal(SIGWINCH, Tview::winch);
 }
 
-void tview::draw_set_winsize()
+void Tview::draw_set_winsize()
 {
 	struct winsize win;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &win);
@@ -32,22 +21,22 @@ void tview::draw_set_winsize()
     row = win.ws_row;
 }
 
-int tview::get_row()
+int Tview::get_row()
 {
 	return row;	
 }
 
-int tview::get_col()
+int Tview::get_col()
 {
     return col;
 }
 
-void tview::winch(int n)
+void Tview::winch(int n)
 {
 	onwinch();
 }
 
-void tview::draw_v_line(int x, int y, int len)
+void Tview::draw_v_line(int x, int y, int len)
 {
 	draw_go_to(x, y);
 	for (int i = y; i <= len + y; ++i)
@@ -57,7 +46,7 @@ void tview::draw_v_line(int x, int y, int len)
 	}
 }
 
-void tview::draw_g_line(int x, int y, int len)
+void Tview::draw_g_line(int x, int y, int len)
 {
 	draw_go_to(x, y);
 	for (int i = x; i <= len + x; ++i)
@@ -67,7 +56,7 @@ void tview::draw_g_line(int x, int y, int len)
 	}
 }
 
-void tview::draw_frame()
+void Tview::draw_frame()
 {
     draw_v_line(0, 0, row);
     draw_v_line(col, 0, row);
@@ -79,68 +68,91 @@ void tview::draw_frame()
     draw_string(0, row, "+");
 }
 
-void tview::draw_string(int x, int y, string str)
+void Tview::draw_string(int x, int y, string str)
 {
 	draw_go_to(x, y);
 	cout << str;
 }
 
-void tview::draw_go_to(int x, int y)
+void Tview::draw_go_to(int x, int y)
 {
 	printf(ESC "[%d;%dH", y, x);
 }
 
-void tview::draw_clear_all()
+void Tview::draw_clear_all()
 {
 	printf(ESC "[H");
 	printf(ESC "[J");
 }
 
-void tview::draw_set_color(char color)
+void Tview::draw_set_color(string color)
 {
-	switch (color)
+	if (color == "r")
 	{
-		case 'r':
-			printf(ESC "[31;1m");
-			break;
-		case 'g':
-			printf(ESC "[32;1m");
-			break;
-		case 'y':
-			printf(ESC "[33;1m");
-			break;
-		case 'b':
-			printf(ESC "[34;1m");
-			break;
-		default:
-			break;
+		printf(ESC "[31;1m");
 	}
+	else if (color == "green")
+	{
+		printf(ESC "[32;1m");
+	}
+    else if (color == "y")
+    {
+		printf(ESC "[33;1m");
+    }
+    else if (color == "b")
+    {
+		printf(ESC "[34;1m");
+    }
+    else if (color == "gray")
+    {
+		printf(ESC "[30;1m");
+    }
 }
 
-void tview::draw_default_color()
+void Tview::draw_default_color()
 {
 	printf(ESC "[0m");
 }
 
-void tview::paint(const Rabbit& r)
+void Tview::paint(const Rabbit& rabbit)
 {
-	Coord c = r.get_coord();
-	draw_string(c.x, c.y, "r");
+	Coord c = rabbit.get_coord();
+	draw_set_color("b");
+	draw_string(c.x, c.y, "*");
 }
 
-void tview::paint(const Snake& s)
+void Tview::paint(const list<Rabbit>& rabbits)
 {
-
+	for (Rabbit item : rabbits)
+	{
+		paint(item);
+	}
 }
 
-void tview::show()
+void Tview::paint(const Snake& snake)
+{
+	draw_set_color("y");
+	for (Coord c : snake.get_body())
+	{
+		draw_string(c.x, c.y, "-");
+	}
+	Coord head = snake.get_head();
+	switch(snake.get_direct())
+	{
+		case LEFT:
+			draw_string(head.x, head.y, ">");
+			break;
+		case RIGHT:
+			draw_string(head.x, head.y, "<");
+			break;
+	}
+	draw_default_color();
+}
+
+void Tview::show()
 {
 	setbuf(stdout, NULL);
 	draw_clear_all();
 	draw_set_winsize();
 	draw_frame();
-	draw_set_color('y');
-	draw_string(col / 2, row / 2, "SNAKE");
-	draw_default_color();
 }
-

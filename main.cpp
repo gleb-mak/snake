@@ -1,17 +1,17 @@
 #include <iostream>
-#include "tview.h"
 #include <string>
+#include "tview.h"
 #include "view.h"
 #include "model.h"
 
 using namespace std;
 
 int main() {
-	tview v;
+	Tview v;
 	Model m(&v);
 	v.show();
-	list<Rabbit> rabbits = m.get_rabbits();
-	v.paint(rabbits.back());
+	v.paint(m.get_rabbits());
+	v.paint(m.get_snake());
 	getchar();
 	return 0;
 }
