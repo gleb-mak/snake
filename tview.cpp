@@ -132,9 +132,10 @@ void Tview::paint(const list<Rabbit>& rabbits)
 void Tview::paint(const Snake& snake)
 {
 	draw_set_color("y");
+	draw_string(snake.get_tail().x, snake.get_tail().y, "o");
 	for (Coord c : snake.get_body())
 	{
-		draw_string(c.x, c.y, "-");
+		draw_string(c.x, c.y, "o");
 	}
 	Coord head = snake.get_head();
 	switch(snake.get_direct())
@@ -145,8 +146,31 @@ void Tview::paint(const Snake& snake)
 		case RIGHT:
 			draw_string(head.x, head.y, "<");
 			break;
+		case UP:
+			draw_string(head.x, head.y, "^");
+			break;
+		case DOWN:
+			draw_string(head.x, head.y, "v");
+			break;
 	}
 	draw_default_color();
+}
+
+void Tview::paint(const Coord& c, string obj, string color)
+{
+	draw_set_color(color);
+	draw_string(c.x, c.y, obj);
+	draw_default_color();
+}
+
+void Tview::clear(const Coord& c)
+{
+	draw_string(c.x, c.y, " ");
+}
+
+void repaint(const Snake& snake)
+{
+
 }
 
 void Tview::show()

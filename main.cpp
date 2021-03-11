@@ -12,6 +12,7 @@ int main() {
 	v.show();
 	v.paint(m.get_rabbits());
 	v.paint(m.get_snake());
-	getchar();
+	m.tick(250000);
+	//getchar();
 	return 0;
 }

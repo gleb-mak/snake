@@ -1,8 +1,10 @@
 #pragma once
 
+#include <iterator>
 #include <ctime>
 #include <iostream>
 #include <list>
+#include <unistd.h>
 
 using namespace std;
 
@@ -32,7 +34,12 @@ public:
 	Snake(Coord begin, int len);
 	list<Coord> get_body() const;
 	Coord get_head() const;
+	Coord get_tail() const;
 	Direction get_direct() const;
+	void erase_tail();
+	void push_cell(Coord c);
+	void inc_dec_head(string flag, char obj);
+	void inc_dec_tail(string flag, char obj);
 private:
 	list<Coord> body;
 	Coord head;
@@ -45,8 +52,11 @@ public:
 	Model(View* myview);
 	list<Rabbit> get_rabbits();
 	Snake get_snake();
+	void tick(int interval);
 private:
 	View* view;
 	list<Rabbit> rabbits; 
 	Snake snake;
+	void updatestate(Snake& s);
+	void updatestate(list<Rabbit>& r);
 };

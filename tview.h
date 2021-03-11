@@ -21,6 +21,8 @@ public:
 	void paint(const Rabbit& rabbit);
 	void paint(const list<Rabbit>& rabbits);
 	void paint(const Snake& snake);
+	void paint(const Coord& c, string obj, string color);
+	void clear(const Coord& c);
 	int get_row();
 	int get_col();
 
