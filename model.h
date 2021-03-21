@@ -31,10 +31,11 @@ class Snake
 {
 public:
 	Snake();
-	Snake(Coord begin, int len);
+	Snake(Coord begin, int len, int style);
 	list<Coord> get_body() const;
 	Coord get_head() const;
 	Coord get_tail() const;
+	int get_style() const;
 	Direction get_direct() const;
 	void set_direct(Direction direct);
 	void erase_tail();
@@ -45,6 +46,7 @@ private:
 	list<Coord> body;
 	Coord head;
 	Direction direct;
+	int style;
 };
 
 class Model
@@ -52,7 +54,7 @@ class Model
 public:
 	Model(View* myview);
 	list<Rabbit>& get_rabbits();
-	Snake& get_snake();
+	list<Snake>& get_snakes();
 	void tick();
 	Snake& create_snake();
 private:

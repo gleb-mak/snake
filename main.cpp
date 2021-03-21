@@ -30,19 +30,24 @@ public:
 int main() {
 	Tview v;
 	Model m(&v);
-	KeyController c(&m.get_snake(), &v);
-//	AiController ai(, &v);
+	KeyController c(&m.get_snakes().front(), &v);
+	AiController ai(&v, &m.create_snake(), &m);
 	Quiter q(&v);
 	v.show();
 	for (auto& rabbit : m.get_rabbits())
 	{
 		v.paint(rabbit.get_coord());
 	}
-	DrawSnake draw_snake;
-	draw_snake.body = m.get_snake().get_body();
-	draw_snake.direct = m.get_snake().get_direct();
-	draw_snake.color = 1;
-	v.paint(draw_snake);
+	int i = 0;
+	for (auto& snake : m.get_snakes())
+	{
+		DrawSnake draw_snake;
+		draw_snake.body = snake.get_body();
+		draw_snake.direct = snake.get_direct();
+		draw_snake.color = i;
+		i++;
+		v.paint(draw_snake);
+	}
 	v.runloop();
 	//getchar();
 	return 0;

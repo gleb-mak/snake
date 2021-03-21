@@ -19,7 +19,7 @@ Model::Model(View* myview)
 	begin.y = row / 2;
 	//snake = Snake();
 	view->ontimer(bind(&Model::tick, this), 100);
-	snakes.push_back(Snake(begin, 10));
+	snakes.push_back(Snake(begin, 10, 0));
 }
 
 void Model::updatestate(Snake& s)
@@ -28,7 +28,7 @@ void Model::updatestate(Snake& s)
 	draw.tail = s.get_body().back();
 	draw.direct = s.get_direct();
 	draw.body = s.get_head();
-	draw.color = 1;
+	draw.color = s.get_style();
 	draw.is_tail = true;
 	switch (s.get_direct())
 	{
@@ -60,20 +60,23 @@ void Model::updatestate(Snake& s)
 
 void Model::updatestate(list<Rabbit>& rabs)
 {
-	list<Rabbit>::const_iterator this_it = find_rabbit(snakes.back().get_head());
-	if (this_it != cend(rabbits))
+	for (auto& snake : snakes)
 	{
-		list<Rabbit>::iterator it = rabbits.begin();
-		while(it != rabbits.end())
+		list<Rabbit>::const_iterator this_it = find_rabbit(snake.get_head());
+		if (this_it != cend(rabbits))
 		{
-			if (it == this_it)
+			list<Rabbit>::iterator it = rabbits.begin();
+			while(it != rabbits.end())
 			{
-				rabbits.erase(it);
-				break;
-			}
-			else
-			{
-				it++;
+				if (it == this_it)
+				{
+					rabbits.erase(it);
+					break;
+				}
+				else
+				{
+					it++;
+				}
 			}
 		}
 	}
@@ -96,7 +99,10 @@ void Model::updatestate(list<Rabbit>& rabs)
 
 void Model::tick()
 {
-	updatestate(snakes.front());
+	for (auto& snake : snakes)
+	{
+		updatestate(snake);
+	}
 	updatestate(rabbits);
 }
 
@@ -112,14 +118,16 @@ list<Rabbit>::const_iterator Model::find_rabbit(Coord coord)
 	return cend(get_rabbits());
 }
 
-Snake& Model::get_snake()
+list<Snake>& Model::get_snakes()
 {
-	return snakes.front();
+	return snakes;
 }
 
 Snake& Model::create_snake()
 {
-	snakes.push_back(Snake({5, 5}, 5));
+	list<Snake>::iterator it = snakes.end();
+	it--;
+	snakes.push_back(Snake({5, 5}, 5, (*it).get_style() + 1));
 	return snakes.back();
 }
 
@@ -164,7 +172,7 @@ Snake::Snake()
 	direct = LEFT;
 }
 
-Snake::Snake(Coord begin, int len)
+Snake::Snake(Coord begin, int len, int style_)
 {
     for (int i = 0; i < len; ++i)
     {
@@ -173,6 +181,7 @@ Snake::Snake(Coord begin, int len)
     }
 	head = begin;
 	head.x--;
+	style = style_;
     direct = LEFT;
 }
 
@@ -189,6 +198,11 @@ Coord Snake::get_head() const
 Coord Snake::get_tail() const
 {
 	return body.back();
+}
+
+int Snake::get_style() const
+{
+	return style;
 }
 
 Direction Snake::get_direct() const
