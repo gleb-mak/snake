@@ -1,5 +1,6 @@
 #include "model.h"
 #include "view.h"
+#include <algorithm>
 
 Model::Model(View* myview)
 {
@@ -9,67 +10,122 @@ Model::Model(View* myview)
 	srand(time(NULL));
 	for (int i = 0; i < 5; ++i)
 	{
-		int x = rand() % (col - 2) + 1;
-		int y = rand() % (row - 2) + 1;
+		int x = rand() % (col - 3) + 2;
+		int y = rand() % (row - 3) + 2;
 		rabbits.push_back(Rabbit(x, y));
 	}
 	Coord begin;
 	begin.x = col / 2;
 	begin.y = row / 2;
-	snake = Snake();
-	//snake = Snake(begin, 10);
+	//snake = Snake();
+	view->ontimer(bind(&Model::tick, this), 100);
+	snakes.push_back(Snake(begin, 10));
 }
 
 void Model::updatestate(Snake& s)
 {
-	view->paint(s.get_head(), "o", "y");
-	s.push_cell(s.get_head());
+	DrawUpdateSnake draw;
+	draw.tail = s.get_body().back();
+	draw.direct = s.get_direct();
+	draw.body = s.get_head();
+	draw.color = 1;
+	draw.is_tail = true;
 	switch (s.get_direct())
 	{
 		case LEFT:
 			s.inc_dec_head("inc", 'x');
-			view->paint(s.get_head(), ">", "y");
 			break;
 		case RIGHT:
 			s.inc_dec_head("dec", 'x');
-			view->paint(s.get_head(), "<", "y");
 			break;
 		case UP:
 			s.inc_dec_head("dec", 'y');
-            view->paint(s.get_head(), "^", "y");
 			break;
 		case DOWN:
 			s.inc_dec_head("inc", 'y');
-            view->paint(s.get_head(), "v", "y");
 			break;
 	}
-	view->clear(s.get_tail());
-	s.erase_tail();
-}
-
-void Model::updatestate(list<Rabbit>& rab)
-{
-
-}
-
-void Model::tick(int interval)
-{
-	while(1)
+	s.push_cell(s.get_head());
+	draw.head = s.get_head();
+	if (find_rabbit(s.get_head()) == cend(get_rabbits()))
 	{
-		updatestate(snake);
-		updatestate(rabbits);
-		usleep(interval);
+		s.erase_tail();
+	}
+	else
+	{
+		draw.is_tail = false;
+	}
+	view->paint(draw);
+}
+
+void Model::updatestate(list<Rabbit>& rabs)
+{
+	list<Rabbit>::const_iterator this_it = find_rabbit(snakes.back().get_head());
+	if (this_it != cend(rabbits))
+	{
+		list<Rabbit>::iterator it = rabbits.begin();
+		while(it != rabbits.end())
+		{
+			if (it == this_it)
+			{
+				rabbits.erase(it);
+				break;
+			}
+			else
+			{
+				it++;
+			}
+		}
+	}
+	if (rabbits.size() < 3)
+	{
+		int col = view->get_col();
+		int row = view->get_row();
+		for (int i = 0; i < 3; ++i)
+		{
+			int x = rand() % (col - 3) + 2;
+			int y = rand() % (row - 3) + 2;
+			rabbits.push_back(Rabbit(x, y));
+			Coord c;
+			c.x = x;
+			c.y = y;
+			view->paint(c);
+		}
 	}
 }
 
-list<Rabbit> Model::get_rabbits()
+void Model::tick()
 {
-	return rabbits;
+	updatestate(snakes.front());
+	updatestate(rabbits);
 }
 
-Snake Model::get_snake()
+list<Rabbit>::const_iterator Model::find_rabbit(Coord coord)
 {
-	return snake;
+	for (list<Rabbit>::const_iterator it = cbegin(get_rabbits()); it != cend(get_rabbits()); it++)
+	{
+		if ((*it).get_coord().x == coord.x && (*it).get_coord().y == coord.y)
+		{
+			return it;
+		}
+	}
+	return cend(get_rabbits());
+}
+
+Snake& Model::get_snake()
+{
+	return snakes.front();
+}
+
+Snake& Model::create_snake()
+{
+	snakes.push_back(Snake({5, 5}, 5));
+	return snakes.back();
+}
+
+list<Rabbit>& Model::get_rabbits()
+{
+	return rabbits;
 }
 
 Rabbit::Rabbit(int x, int y)
@@ -90,18 +146,18 @@ Snake::Snake()
 	{
 		for (int i = 0; i < 3; ++i)
 		{
-			body.push_back(c);
+			body.push_front(c);
 			c.x++;
 		}
 		for (int i = 0; i < 3; ++i)
 		{
-			body.push_back(c);
+			body.push_front(c);
 			c.y++;
 		}
 	}
 	for (int i = 0; i < 3; ++i)
 	{
-		body.push_back(c);
+		body.push_front(c);
 		c.x++;
 	}
 	head = c;
@@ -112,10 +168,11 @@ Snake::Snake(Coord begin, int len)
 {
     for (int i = 0; i < len; ++i)
     {
-        body.push_back(begin);
+        body.push_front(begin);
         begin.x++;
     }
 	head = begin;
+	head.x--;
     direct = LEFT;
 }
 
@@ -131,13 +188,17 @@ Coord Snake::get_head() const
 
 Coord Snake::get_tail() const
 {
-	list<Coord>::const_iterator it = body.begin();
-	return *it;
+	return body.back();
 }
 
 Direction Snake::get_direct() const
 {
 	return direct;
+}
+
+void Snake::set_direct(Direction d)
+{
+	direct = d;
 }
 
 void Snake::inc_dec_head(string flag, char obj)
@@ -168,11 +229,12 @@ void Snake::inc_dec_head(string flag, char obj)
 
 void Snake::push_cell(Coord c)
 {
-	body.push_back(c);
+	body.push_front(c);
 }
 
 void Snake::erase_tail()
 {
-	list<Coord>::iterator it = body.begin();
+	list<Coord>::iterator it = body.end();
+	it--;
 	body.erase(it);
 }

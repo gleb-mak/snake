@@ -8,9 +8,61 @@ function<void(void)> Tview::onwinch;
 
 Tview::Tview()
 {
+	struct termios termios_p;
+	tcgetattr(0, &termios_p);
+	old = termios_p;
+	cfmakeraw(&termios_p);
+	tcsetattr(0, TCSAFLUSH, &termios_p);
 	draw_set_winsize();
 	onwinch = bind(&Tview::show, this);
 	signal(SIGWINCH, Tview::winch);
+}
+
+Tview::~Tview()
+{
+	tcsetattr(0, TCSAFLUSH, &old);
+}
+
+void Tview::runloop()
+{
+	struct pollfd fds[] = { {0, POLLIN, 0} };
+	finished = false;
+	int flag = 1;
+	while(!finished)
+	{
+		int n = poll(fds, 1, timer.second * flag);
+		flag = 1;
+		if (n == 0)
+		{
+			timer.first();
+		}
+		else
+		{
+			flag = 0;
+			char buf[1];
+			read(0, buf, 1);
+			for (auto f : pressed)
+			{
+				f(buf[0]);
+			}
+		}
+	}
+}
+
+void Tview::quit()
+{
+	finished = true;
+}
+
+void Tview::ontimer(const timer_fn f, int time)
+{
+	timer.first = f;
+	timer.second = time;
+}
+
+void Tview::onkey(const key_fn k)
+{
+	pressed.push_back(k);	
 }
 
 void Tview::draw_set_winsize()
@@ -85,6 +137,8 @@ void Tview::draw_clear_all()
 	printf(ESC "[J");
 }
 
+static char* colors[] = { "r", "green", "y", "b", "gray"};
+
 void Tview::draw_set_color(string color)
 {
 	if (color == "r")
@@ -114,58 +168,44 @@ void Tview::draw_default_color()
 	printf(ESC "[0m");
 }
 
-void Tview::paint(const Rabbit& rabbit)
+void Tview::paint(const Coord& c)
 {
-	Coord c = rabbit.get_coord();
 	draw_set_color("b");
 	draw_string(c.x, c.y, "*");
-}
-
-void Tview::paint(const list<Rabbit>& rabbits)
-{
-	for (Rabbit item : rabbits)
-	{
-		paint(item);
-	}
-}
-
-void Tview::paint(const Snake& snake)
-{
-	draw_set_color("y");
-	draw_string(snake.get_tail().x, snake.get_tail().y, "o");
-	for (Coord c : snake.get_body())
-	{
-		draw_string(c.x, c.y, "o");
-	}
-	Coord head = snake.get_head();
-	switch(snake.get_direct())
-	{
-		case LEFT:
-			draw_string(head.x, head.y, ">");
-			break;
-		case RIGHT:
-			draw_string(head.x, head.y, "<");
-			break;
-		case UP:
-			draw_string(head.x, head.y, "^");
-			break;
-		case DOWN:
-			draw_string(head.x, head.y, "v");
-			break;
-	}
 	draw_default_color();
 }
 
-void Tview::paint(const Coord& c, string obj, string color)
+void Tview::paint(const DrawSnake& s)
 {
-	draw_set_color(color);
-	draw_string(c.x, c.y, obj);
+	draw_set_color(colors[s.color]);
+	bool first = true;
+	for (Coord c : s.body) 
+	{
+		if (!first)
+		{
+			draw_string(c.x, c.y, "o");
+		}
+		first = false;
+	}
+	Coord head = s.body.front();
+	string arrow;
+	arrow += "><^v"[s.direct];
+	draw_string(head.x, head.y, arrow);
 	draw_default_color();
 }
 
-void Tview::clear(const Coord& c)
+void Tview::paint(const DrawUpdateSnake& s)
 {
-	draw_string(c.x, c.y, " ");
+	draw_set_color(colors[s.color]);
+    draw_string(s.body.x, s.body.y, "o");
+	string arrow;
+    arrow += "><^v"[s.direct];
+    draw_string(s.head.x, s.head.y, arrow);
+	if (s.is_tail)
+	{
+		draw_string(s.tail.x, s.tail.y, " ");
+	}
+	draw_default_color();
 }
 
 void repaint(const Snake& snake)

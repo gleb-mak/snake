@@ -36,6 +36,7 @@ public:
 	Coord get_head() const;
 	Coord get_tail() const;
 	Direction get_direct() const;
+	void set_direct(Direction direct);
 	void erase_tail();
 	void push_cell(Coord c);
 	void inc_dec_head(string flag, char obj);
@@ -50,13 +51,15 @@ class Model
 {
 public:
 	Model(View* myview);
-	list<Rabbit> get_rabbits();
-	Snake get_snake();
-	void tick(int interval);
+	list<Rabbit>& get_rabbits();
+	Snake& get_snake();
+	void tick();
+	Snake& create_snake();
 private:
 	View* view;
 	list<Rabbit> rabbits; 
-	Snake snake;
+	list<Snake> snakes;
 	void updatestate(Snake& s);
 	void updatestate(list<Rabbit>& r);
+	list<Rabbit>::const_iterator find_rabbit(Coord coord);
 };

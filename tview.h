@@ -1,5 +1,7 @@
 #pragma once
 
+#include <termios.h>
+#include <poll.h>
 #include <string>
 #include <cstdio>
 #include <functional>
@@ -17,19 +19,25 @@ class Tview : public View
 {
 public:
 	Tview();
+	~Tview();
 	void show();
-	void paint(const Rabbit& rabbit);
-	void paint(const list<Rabbit>& rabbits);
-	void paint(const Snake& snake);
-	void paint(const Coord& c, string obj, string color);
-	void clear(const Coord& c);
+	void paint(const Coord& r);//rabbit
+    void paint(const DrawSnake& s);//snake
+    void paint(const DrawUpdateSnake& s);
 	int get_row();
 	int get_col();
+	void ontimer(const timer_fn, int time);
+	void onkey(const key_fn);
+	void runloop();
+	void quit();
 
 private:
+	bool finished;
 	int row;
 	int col;
-
+	struct termios old;
+	list<key_fn> pressed;
+	pair<timer_fn, int> timer;
 	static function<void(void)> onwinch;
 	static void winch(int n);
 	void draw_set_winsize();
