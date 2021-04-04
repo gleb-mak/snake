@@ -1,6 +1,7 @@
 #include "model.h"
 #include "view.h"
 #include <algorithm>
+#include <cmath>
 
 Model::Model(View* myview)
 {
@@ -99,11 +100,17 @@ void Model::updatestate(list<Rabbit>& rabs)
 
 void Model::tick()
 {
+	move_fn_();
 	for (auto& snake : snakes)
 	{
 		updatestate(snake);
 	}
 	updatestate(rabbits);
+}
+
+void Model::onmove(move_fn fn)
+{
+	move_fn_ = fn;
 }
 
 list<Rabbit>::const_iterator Model::find_rabbit(Coord coord)
@@ -127,13 +134,77 @@ Snake& Model::create_snake()
 {
 	list<Snake>::iterator it = snakes.end();
 	it--;
-	snakes.push_back(Snake({5, 5}, 5, (*it).get_style() + 1));
+	snakes.push_back(Snake({5, 5}, 10, (*it).get_style() + 1));
 	return snakes.back();
 }
 
 list<Rabbit>& Model::get_rabbits()
 {
 	return rabbits;
+}
+
+Rabbit& Model::nearest_rabbit(Snake& s)
+{
+    int min = 1000000;
+	list<Rabbit>::iterator ans = rabbits.begin();
+    for (list<Rabbit>::iterator it = rabbits.begin(); it != rabbits.end(); ++it)
+    {
+        if (s.get_body().front().get_distance(it->get_coord()) < min)
+		{
+			min = s.get_body().front().get_distance(it->get_coord());
+			ans = it;
+		}
+    }	
+	return (*ans);
+}
+
+int Model::distance_head_to_rabbit(list<Rabbit>::iterator it_rab)
+{
+	return snakes.back().get_body().front().get_distance(it_rab->get_coord());
+}
+
+Direction Model::get_direct_to_rabbit(Rabbit& rab, Snake& s)
+{
+	// int current_distance = distance_head_to_rabbit();
+	// Coord 
+	// if (snakes.back().get_body().front().get_distance(it->get_coord()) < )
+	// {
+    //
+	// }
+	Coord h = s.get_body().front();
+	Coord r = rab.get_coord();
+	Direction d = s.get_direct();
+	if (r.x < h.x)
+	{
+		if (d != LEFT)
+		{
+			return RIGHT;
+		}
+	}
+	else if (r.x > h.x)
+	{
+		if (d != RIGHT)
+		{
+			return LEFT;
+		}
+	}
+	else
+	{
+		if (r.y > h.y)
+		{
+			if (d != UP)
+			{
+				return DOWN;
+			}
+		}
+		else
+		{
+			if (d != DOWN)
+			{
+				return UP;
+			}
+		}	
+	}
 }
 
 Rabbit::Rabbit(int x, int y)
@@ -251,4 +322,9 @@ void Snake::erase_tail()
 	list<Coord>::iterator it = body.end();
 	it--;
 	body.erase(it);
+}
+
+int Coord::get_distance(Coord end)
+{
+	return abs(x - end.x) + abs(y - end.y);
 }

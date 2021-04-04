@@ -5,15 +5,19 @@
 #include <iostream>
 #include <list>
 #include <unistd.h>
+#include <functional>
 
 using namespace std;
+using move_fn = function<void(void)>;
 
 class View;
 
-struct Coord
+class Coord
 {
+public:
 	int x;
 	int y;
+	int get_distance(Coord end);
 };
 
 class Rabbit
@@ -57,6 +61,10 @@ public:
 	list<Snake>& get_snakes();
 	void tick();
 	Snake& create_snake();
+	int get_distance();
+	Rabbit& nearest_rabbit(Snake& s);
+	Direction get_direct_to_rabbit(Rabbit& r, Snake& s);
+	void onmove(const move_fn fn);
 private:
 	View* view;
 	list<Rabbit> rabbits; 
@@ -64,4 +72,6 @@ private:
 	void updatestate(Snake& s);
 	void updatestate(list<Rabbit>& r);
 	list<Rabbit>::const_iterator find_rabbit(Coord coord);
+	int distance_head_to_rabbit(list<Rabbit>::iterator it_rab);
+	move_fn move_fn_;
 };

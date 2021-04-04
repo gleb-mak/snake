@@ -1,4 +1,4 @@
-OBJ = tview.o model.o main.o
+OBJ = tview.o model.o main.o ai_controller.o
 EXE = snake
 CXXFLAGS += -Wall -g
 
