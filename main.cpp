@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include "gview.h"
 #include "tview.h"
 #include "view.h"
 #include "model.h"
@@ -28,15 +29,20 @@ public:
 };
 
 int main() {
-	Tview v;
-	Model m(&v);
-	KeyController c(&m.get_snakes().front(), &v);
-	AiController ai(&v, &m.create_snake(), &m);
-	Quiter q(&v);
-	v.show();
+
+	char type;
+	std::cin >> type;
+	View* v = View::create(type);
+	// Gview* v;
+	Model m(v);
+	KeyController c(&m.get_snakes().front(), v);	
+	AiController ai(v, &m.create_snake(), &m);
+	// AiController ai_2(v, &m.create_snake(), &m);
+	Quiter q(v);
+	v->show();
 	for (auto& rabbit : m.get_rabbits())
 	{
-		v.paint(rabbit.get_coord());
+		v->paint(rabbit.get_coord());
 	}
 	int i = 0;
 	for (auto& snake : m.get_snakes())
@@ -46,9 +52,8 @@ int main() {
 		draw_snake.direct = snake.get_direct();
 		draw_snake.color = i;
 		i++;
-		v.paint(draw_snake);
+		v->paint(draw_snake);
 	}
-	v.runloop();
-	//getchar();
+	v->runloop();
 	return 0;
 }

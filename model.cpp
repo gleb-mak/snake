@@ -24,7 +24,9 @@ Model::Model(View* myview)
 }
 
 void Model::updatestate(Snake& s)
-{
+{	
+	int col = view->get_col();
+    int row = view->get_row();
 	DrawUpdateSnake draw;
 	draw.tail = s.get_body().back();
 	draw.direct = s.get_direct();
@@ -34,16 +36,16 @@ void Model::updatestate(Snake& s)
 	switch (s.get_direct())
 	{
 		case LEFT:
-			s.inc_dec_head("inc", 'x');
+			s.inc_dec_head("inc", 'x', row, col);
 			break;
 		case RIGHT:
-			s.inc_dec_head("dec", 'x');
+			s.inc_dec_head("dec", 'x', row, col);
 			break;
 		case UP:
-			s.inc_dec_head("dec", 'y');
+			s.inc_dec_head("dec", 'y', row, col);
 			break;
 		case DOWN:
-			s.inc_dec_head("inc", 'y');
+			s.inc_dec_head("inc", 'y', row, col);
 			break;
 	}
 	s.push_cell(s.get_head());
@@ -100,6 +102,10 @@ void Model::updatestate(list<Rabbit>& rabs)
 
 void Model::tick()
 {
+	// for (auto& fn : move_fn_)
+	// {
+	// 	fn();
+	// }
 	move_fn_();
 	for (auto& snake : snakes)
 	{
@@ -110,6 +116,7 @@ void Model::tick()
 
 void Model::onmove(move_fn fn)
 {
+	// move_fn_.push_back(fn);
 	move_fn_ = fn;
 }
 
@@ -134,7 +141,11 @@ Snake& Model::create_snake()
 {
 	list<Snake>::iterator it = snakes.end();
 	it--;
-	snakes.push_back(Snake({5, 5}, 10, (*it).get_style() + 1));
+	int col = view->get_col();
+    int row = view->get_row();
+	int x = rand() % (col - 3) + 2;
+    int y = rand() % (row - 3) + 2;
+	snakes.push_back(Snake({x, y}, 10, (*it).get_style() + 1));
 	return snakes.back();
 }
 
@@ -286,16 +297,20 @@ void Snake::set_direct(Direction d)
 	direct = d;
 }
 
-void Snake::inc_dec_head(string flag, char obj)
+void Snake::inc_dec_head(string flag, char obj, int row, int col)
 {
+	// int col = view->get_col();
+	// int row = view->get_row();
 	if (flag == "inc")
 	{
 		if (obj == 'x')
 		{
+			// head.x = (head.x + 1) % col;
 			head.x++;
 		}
 		else if (obj == 'y')
 		{
+			// head.y = (head.y + 1) % row;
 			head.y++;
 		}
 	}
@@ -327,4 +342,9 @@ void Snake::erase_tail()
 int Coord::get_distance(Coord end)
 {
 	return abs(x - end.x) + abs(y - end.y);
+}
+
+View* Model::get_view()
+{
+	return view;
 }

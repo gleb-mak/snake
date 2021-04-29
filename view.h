@@ -37,4 +37,9 @@ public:
 	virtual void onkey(const key_fn) = 0;
 	virtual void runloop() = 0;
 	virtual void quit() = 0;
+	static View* create(char type);
+	void set_flag(bool is_gui_);
+	bool IsGui();
+private:
+	bool is_gui;
 };

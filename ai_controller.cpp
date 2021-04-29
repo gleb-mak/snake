@@ -4,6 +4,7 @@ AiController::AiController(View* v_, Snake* s_, Model* m_):
 	v(v_), s(s_), m(m_)
 {
 	m->onmove(bind(&AiController::update_direct, this));
+
 }
 
 void AiController::update_direct()

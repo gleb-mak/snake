@@ -1,16 +1,18 @@
-OBJ = tview.o model.o main.o ai_controller.o
-EXE = snake
-CXXFLAGS += -Wall -g
+CC=g++
+CXXFLAGS=-Wall -g
+OBJECTS=main.o model.o tview.o gview.o view.o ai_controller.o
+EXECUTABLE=snake
+LIBS=-lsfml-graphics -lsfml-window -lsfml-system
 
-all: $(EXE)
-	
-$(EXE): $(OBJ)
-	$(CXX) -o $(EXE) $(OBJ)
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(CXXFLAGS) -o $(EXECUTABLE) $(OBJECTS) $(LIBS)
 
 clear:
-	$(RM) $(OBJ) $(EXE)
+	$(RM) $(OBJECTS) $(EXECUTABLE)
 
 depend:
-	$(CXX) -MM $(OBJ:.o=.cpp) > .depend
+	$(CC) -MM $(CXXFLAGS) $(OBJ:.o=.cpp) > .depend
 
 -include .depend

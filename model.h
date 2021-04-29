@@ -44,7 +44,7 @@ public:
 	void set_direct(Direction direct);
 	void erase_tail();
 	void push_cell(Coord c);
-	void inc_dec_head(string flag, char obj);
+	void inc_dec_head(string flag, char obj, int row, int col);
 	void inc_dec_tail(string flag, char obj);
 private:
 	list<Coord> body;
@@ -65,6 +65,7 @@ public:
 	Rabbit& nearest_rabbit(Snake& s);
 	Direction get_direct_to_rabbit(Rabbit& r, Snake& s);
 	void onmove(const move_fn fn);
+	View* get_view();
 private:
 	View* view;
 	list<Rabbit> rabbits; 
@@ -73,5 +74,6 @@ private:
 	void updatestate(list<Rabbit>& r);
 	list<Rabbit>::const_iterator find_rabbit(Coord coord);
 	int distance_head_to_rabbit(list<Rabbit>::iterator it_rab);
+	// list<move_fn> move_fn_;
 	move_fn move_fn_;
 };
