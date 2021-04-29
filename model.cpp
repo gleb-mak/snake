@@ -102,11 +102,10 @@ void Model::updatestate(list<Rabbit>& rabs)
 
 void Model::tick()
 {
-	// for (auto& fn : move_fn_)
-	// {
-	// 	fn();
-	// }
-	move_fn_();
+	for (auto& fn : move_fn_)
+	{
+		fn();
+	}
 	for (auto& snake : snakes)
 	{
 		updatestate(snake);
@@ -116,8 +115,7 @@ void Model::tick()
 
 void Model::onmove(move_fn fn)
 {
-	// move_fn_.push_back(fn);
-	move_fn_ = fn;
+	move_fn_.push_back(fn);
 }
 
 list<Rabbit>::const_iterator Model::find_rabbit(Coord coord)
@@ -305,13 +303,11 @@ void Snake::inc_dec_head(string flag, char obj, int row, int col)
 	{
 		if (obj == 'x')
 		{
-			// head.x = (head.x + 1) % col;
-			head.x++;
+			head.x = (head.x + 1) % col;
 		}
 		else if (obj == 'y')
 		{
-			// head.y = (head.y + 1) % row;
-			head.y++;
+			head.y = (head.y + 1) % row;
 		}
 	}
 	else if (flag == "dec")
@@ -319,10 +315,12 @@ void Snake::inc_dec_head(string flag, char obj, int row, int col)
 		if (obj == 'x')
         {
             head.x--;
+			head.x = head.x % col;
         }
         else if (obj == 'y')
         {
             head.y--;
+			head.y = head.y % row;
         }
 	}
 }

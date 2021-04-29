@@ -37,7 +37,7 @@ int main() {
 	Model m(v);
 	KeyController c(&m.get_snakes().front(), v);	
 	AiController ai(v, &m.create_snake(), &m);
-	// AiController ai_2(v, &m.create_snake(), &m);
+	AiController ai_2(v, &m.create_snake(), &m);
 	Quiter q(v);
 	v->show();
 	for (auto& rabbit : m.get_rabbits())

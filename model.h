@@ -74,6 +74,5 @@ private:
 	void updatestate(list<Rabbit>& r);
 	list<Rabbit>::const_iterator find_rabbit(Coord coord);
 	int distance_head_to_rabbit(list<Rabbit>::iterator it_rab);
-	// list<move_fn> move_fn_;
-	move_fn move_fn_;
+	list<move_fn> move_fn_;
 };
